@@ -34,14 +34,6 @@ class Node
     @distances_to ||= {}
   end
 
-  def distance_to_min
-    distances_to.sort_by { |k, v| v }.first
-  end
-
-  def distance_from_min
-    distances_from.sort_by { |k, v| v }.first
-  end
-
   def distances_from
     @distances_from ||= {}
   end
@@ -49,7 +41,14 @@ class Node
   def distance_to(node)
     unless distances_to[node.index]
       distances_to[node.index] = (0..$height).map do |height|
-        $image.pixel_color(x + w - 1, height).distance($image.pixel_color(node.x, height))
+        distance = $image.pixel_color(x + w - 1, height).distance($image.pixel_color(node.x, height))
+
+        if height < $height
+          distance -= $image.pixel_color(x + w - 1, height).distance($image.pixel_color(x + w - 1, height + 1))
+          distance -= $image.pixel_color(node.x, height).distance($image.pixel_color(node.x, height + 1))
+        end
+
+        distance
       end.avg
     end
     distances_to[node.index]
@@ -72,8 +71,8 @@ end
 
 indices = [0]
 begin
-  index_to, distance_to_min = nodes[indices.last].distance_to_min
-  index_from, distance_from_min = nodes[indices.first].distance_from_min
+  index_to, distance_to_min = nodes[indices.last].distances_to.select { |k, v| !indices.include?(k) }.sort_by { |k, v| v }.first
+  index_from, distance_from_min = nodes[indices.first].distances_from.select { |k, v| !indices.include?(k) }.sort_by { |k, v| v }.first
 
   distance_to_min < distance_from_min ? indices << (index = index_to) : indices.insert(0, index = index_from)
 end while indices.size < $nodes_count
