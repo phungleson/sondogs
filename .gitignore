@@ -1,5 +1,5 @@
 vendor
+.DS_Store
 .bundle
 Gemfile.lock
-run_correct.png
-run_correct_bonus.png
+unshredded_*.png
