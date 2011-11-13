@@ -6,7 +6,6 @@ class ShreddedImage
     @image = Magick::Image::read(@file).first
     @width = @image.columns
     @height = @image.rows
-    @sensitivity = 3000
     @width_of_sheet = 32 # default value
   end
 
@@ -32,7 +31,7 @@ class ShreddedImage
       distances[x] = distance_between(x, x + 1)
 
       # A cut is signified by an increase (distances[-3] - distances[-2]) then decrease (distances[-2] - distances[-1]).
-      if distances.size > 2 && distances[x - 1] - distances[x - 2] > sensitivity && distances[x - 1] - distances[x] > sensitivity
+      if distances.size > 2 && distances[x - 1] - distances[x - 2] > 0 && distances[x - 1] - distances[x] > 0
         # Don't count if the current set of cuts already includes this width.
         next if cuts.include?(x)
 
@@ -45,7 +44,7 @@ class ShreddedImage
           distance1 = distance_between(cut - 1, cut)
           distance = distance_between(cut, cut + 1)
 
-          if distance1 - distance2 > sensitivity && distance1 - distance > sensitivity
+          if distance1 - distance2 > 0 && distance1 - distance > 0
             _cuts << cut
             cut += x
           else
@@ -55,8 +54,9 @@ class ShreddedImage
           end
         end
 
-        cuts = _cuts if _cuts.size > 0
+        cuts = _cuts and break if _cuts.size > 0
       end
+
     end
 
     @width_of_sheet = cuts.first if cuts.size
