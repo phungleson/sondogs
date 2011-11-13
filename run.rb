@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rmagick'
 
 $image = Magick::Image::read('run.png').first
-$wigth = 640
+$width = 640
 $height = 359
 $node_width = 32
 $nodes_count = 20
@@ -79,7 +79,7 @@ end while indices.size < $nodes_count
 
 p indices
 
-image = Magick::Image.new($wigth, $height)
+image = Magick::Image.new($width, $height)
 indices.each_with_index do |correct_index, index|
   (0..$height - 1).each do |h|
     $image.get_pixels(correct_index * $node_width, h, $node_width, 1).each_with_index do |pixel, i|
