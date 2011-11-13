@@ -33,7 +33,6 @@ class ShreddedImage
 
       # A cut is signified by an increase (distances[-3] - distances[-2]) then decrease (distances[-2] - distances[-1]).
       if distances.size > 2 && distances[x - 1] - distances[x - 2] > sensitivity && distances[x - 1] - distances[x] > sensitivity
-        p "#{x}, #{distances[-2] - distances[-3]}, #{distances[-2] - distances[-1]}"
         # Don't count if the current set of cuts already includes this width.
         next if cuts.include?(x)
 
