@@ -1,4 +1,4 @@
-class Mirage
+class Image
   attr_reader :file, :image, :width, :height, :sensitivity, :width_of_sheet
 
   def initialize(file)

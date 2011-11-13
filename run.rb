@@ -4,7 +4,7 @@ require 'rmagick'
 
 require 'ext'
 require 'sheet'
-require 'mirage'
+require 'image'
 
-mirage = Mirage.new('run.png')
+mirage = Image.new('run.png')
 mirage.unshred
