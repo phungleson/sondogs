@@ -1,4 +1,4 @@
-class Image
+class ShreddedImage
   attr_reader :file, :image, :width, :height, :sensitivity, :width_of_sheet
 
   def initialize(file)
@@ -23,6 +23,44 @@ class Image
 
       distance
     end.avg
+  end
+
+  def autodetect
+    cuts = []
+    distances = []
+    (0..width / 2).each do |x|
+      distances[x] = distance_between(x, x + 1)
+
+      # A cut is signified by an increase (distances[-3] - distances[-2]) then decrease (distances[-2] - distances[-1]).
+      if distances.size > 2 && distances[x - 1] - distances[x - 2] > sensitivity && distances[x - 1] - distances[x] > sensitivity
+        p "#{x}, #{distances[-2] - distances[-3]}, #{distances[-2] - distances[-1]}"
+        # Don't count if the current set of cuts already includes this width.
+        next if cuts.include?(x)
+
+        # Calculate all possible cuts, assuming the first cut at x.
+        _cuts = [x]
+        cut = x + x
+
+        while (cut < width)
+          distance2 = distance_between(cut - 2, cut - 1)
+          distance1 = distance_between(cut - 1, cut)
+          distance = distance_between(cut, cut + 1)
+
+          if distance1 - distance2 > sensitivity && distance1 - distance > sensitivity
+            _cuts << cut
+            cut += x
+          else
+            # Consider a failure, reset _cuts.
+            _cuts = []
+            break
+          end
+        end
+
+        cuts = _cuts if _cuts.size > 0
+      end
+    end
+
+    @width_of_sheet = cuts.first if cuts.size
   end
 
   def unshred
