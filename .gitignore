@@ -2,3 +2,4 @@ vendor
 .bundle
 Gemfile.lock
 run_correct.png
+run_correct_bonus.png
