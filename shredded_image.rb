@@ -1,5 +1,5 @@
 class ShreddedImage
-  attr_reader :file, :image, :width, :height, :sensitivity, :width_of_sheet
+  attr_reader :file, :image, :width, :height, :width_of_sheet
 
   def initialize(file)
     @file = file
