@@ -21,6 +21,6 @@ class Sheet
 
   # Calculate distance to another sheet.
   def get_distance_to(sheet)
-    distances_to[node.index] ||= sheet.distance_between(x + w - 1, sheet.x)
+    distances_to[sheet.index] ||= mirage.distance_between(x + w - 1, sheet.x)
   end
 end
