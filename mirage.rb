@@ -13,12 +13,12 @@ class Mirage
   # Distance = color distance between 2 vertical lines of pixels - changes in color along the 2 lines.
   def distance_between(x1, x2)
     (0..height).map do |h|
-      distance = image.pixel_color(x1, h).distance(image.pixel_color(x2 + 1, h))
+      distance = image.pixel_color(x1, h).distance(image.pixel_color(x2, h))
 
       if h < height
         # Minus the changes of the pixels below.
-        distance -= image.pixel_color(x1, h).distance(image.pixel_color(x2, h + 1))
-        distance -= image.pixel_color(x1 + 1, h).distance(image.pixel_color(x2 + 1, h + 1))
+        distance -= image.pixel_color(x1, h).distance(image.pixel_color(x1, h + 1))
+        distance -= image.pixel_color(x2, h).distance(image.pixel_color(x2, h + 1))
       end
 
       distance
@@ -30,22 +30,18 @@ class Mirage
     sheets = []
     begin
       sheets << Sheet.new(:mirage => self, :x => x, :y => 0, :w => width_of_sheet, :h => height, :index => sheets.size)
-      x += width
+      x += width_of_sheet
     end while (x < width)
 
     # Calculate distances between sheets.
     sheets.each do |sheet1|
       sheets.each do |sheet2|
         next if sheet2 == sheet1
-        if sheet2.distances_from[sheet1.index]
-          sheet1.distances_to[sheet2.index] = sheet2.distances_from[sheet1.index]
-        else
-          sheet2.distances_from[sheet1.index] = sheet1.get_distance_to(sheet2)
-        end
+        sheet1.distances_to[sheet2.index] = sheet2.distances_from[sheet1.index] ||= sheet1.get_distance_to(sheet2)
       end
     end
 
-    # Greedily build the result by selecting the node with min distance to/from the current node.
+    # Greedily build the result by selecting the sheet with min distance to/from the current sheets.
     indices = [0]
     begin
       index_to, distance_to_min = sheets[indices.last].distances_to.select do |k, v|
@@ -63,8 +59,6 @@ class Mirage
       end
     end while indices.size * width_of_sheet < width
 
-    p indices
-
     # Copy to a new and unsheded image.
     unshredded_image = Magick::Image.new(width, height)
     indices.each_with_index do |correct_index, index|
@@ -75,6 +69,6 @@ class Mirage
       end
     end
 
-    unshredded_image.write("unshredded_#{file}.png")
+    unshredded_image.write("unshredded_#{file}")
   end
 end
