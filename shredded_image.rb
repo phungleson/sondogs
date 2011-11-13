@@ -59,6 +59,7 @@ class ShreddedImage
 
     end
 
+    p cuts
     @width_of_sheet = cuts.first if cuts.size
   end
 
