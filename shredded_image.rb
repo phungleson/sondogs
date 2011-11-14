@@ -26,9 +26,9 @@ class ShreddedImage
 
   def autodetect
     cuts = []
-    distances = []
+    distances = {}
     (0..width / 2).each do |x|
-      distances[x] = distance_between(x, x + 1)
+      distances[x] ||= distance_between(x, x + 1)
 
       # A cut is signified by an increase (distances[-3] - distances[-2]) then decrease (distances[-2] - distances[-1]).
       if distances.size > 2 && distances[x - 1] - distances[x - 2] > 0 && distances[x - 1] - distances[x] > 0
@@ -36,25 +36,23 @@ class ShreddedImage
         next if cuts.include?(x)
 
         # Calculate all possible cuts, assuming the first cut at x.
-        _cuts = [x]
+        cuts_with_x = [x]
         cut = x + x
 
-        while (cut < width)
-          distance2 = distance_between(cut - 2, cut - 1)
-          distance1 = distance_between(cut - 1, cut)
-          distance = distance_between(cut, cut + 1)
+        while (cut < width && cuts_with_x.size > 0)
+          distances[cut - 2] ||= distance_between(cut - 2, cut - 1)
+          distances[cut - 1] ||= distance_between(cut - 1, cut)
+          distances[cut] ||= distance_between(cut, cut + 1)
 
-          if distance1 - distance2 > 0 && distance1 - distance > 0
-            _cuts << cut
+          if distances[cut - 1] - distances[cut - 2] > 0 && distances[cut - 1] - distances[cut] > 0
+            cuts_with_x << cut
             cut += x
           else
-            # Consider a failure, reset _cuts.
-            _cuts = []
-            break
+            cuts_with_x = []
           end
         end
 
-        cuts = _cuts and break if _cuts.size > 0
+        cuts = cuts_with_x and break if cuts_with_x.size > 0
       end
 
     end
