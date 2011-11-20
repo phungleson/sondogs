@@ -25,40 +25,70 @@ class ShreddedImage
   end
 
   def autodetect
-    cuts = []
+    sets = []
     distances = {}
+
     (0..width / 2).each do |x|
       distances[x] ||= distance_between(x, x + 1)
 
-      # A cut is signified by an increase (distances[-3] - distances[-2]) then decrease (distances[-2] - distances[-1]).
-      if distances.size > 2 && distances[x - 1] - distances[x - 2] > 0 && distances[x - 1] - distances[x] > 0
-        # Don't count if the current set of cuts already includes this width.
-        next if cuts.include?(x)
+      next if distances.size < 3
 
-        # Calculate all possible cuts, assuming the first cut at x.
-        cuts_with_x = [x]
+      # A cut is signified by an increase (distances[-2] - distances[-1]) then decrease (distances[-1] - distances[0]).
+      delta_1 = distances[x - 1] - distances[x - 2]
+      delta_2 = distances[x - 1] - distances[x]
+      if delta_1 > 0 && delta_2 > 0
+        # Don't count if the current x is already calculated.
+        next if sets.select { |set_of_cuts| set_of_cuts[x] }.size > 0
+
+        # Calculate all possible cuts, assuming the first cut is at x.
+        set_of_cuts = { x => [delta_1, delta_2] }
         cut = x + x
 
-        while (cut < width && cuts_with_x.size > 0)
+        while cut < width
           distances[cut - 2] ||= distance_between(cut - 2, cut - 1)
           distances[cut - 1] ||= distance_between(cut - 1, cut)
           distances[cut] ||= distance_between(cut, cut + 1)
 
-          if distances[cut - 1] - distances[cut - 2] > 0 && distances[cut - 1] - distances[cut] > 0
-            cuts_with_x << cut
+          d_1 = distances[cut - 1] - distances[cut - 2]
+          d_2 = distances[cut - 1] - distances[cut]
+
+          if d_1 > 0 && d_2 > 0
+            set_of_cuts[cut] = [d_1, d_2]
             cut += x
           else
-            cuts_with_x = []
+            set_of_cuts.nil?
+            break
           end
         end
 
-        cuts = cuts_with_x and break if cuts_with_x.size > 0
+        sets << set_of_cuts if set_of_cuts
       end
 
     end
 
-    p cuts
-    @width_of_sheet = cuts.first if cuts.size
+    if sets.size > 0
+      # The chosen set must have max average of deltas.
+      average_highest = 0
+      index = 0
+      sets.each_with_index do |set_of_cuts, i|
+        average_of_deltas = set_of_cuts.map do |cut, deltas|
+          deltas
+        end.flatten.avg
+
+        p "Set #{i} avg => #{average_of_deltas.to_i} for cuts at: #{set_of_cuts.sort_by { |cut, deltas| cut }.map { |cut, deltas| "#{cut} => [#{deltas[0].to_i}, #{deltas[1].to_i}]" }.join(', ')}"
+
+        if average_highest < average_of_deltas
+          average_highest = average_of_deltas
+          index = i
+        end
+      end
+
+      p "Chosen set with the highest average of #{average_highest.to_i} at index #{index}: #{sets[index].sort_by { |cut, deltas| cut }.map { |cut, deltas| cut }.join(', ')}"
+
+      @width_of_sheet = sets[index].keys.sort.first
+    else
+      p "Failed to auto detect possible cuts."
+    end
   end
 
   def unshred
