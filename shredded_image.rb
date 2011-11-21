@@ -75,7 +75,7 @@ class ShreddedImage
           deltas
         end.flatten.avg
 
-        p "Set #{i} avg => #{average_of_deltas.to_i} for cuts at: #{set_of_cuts.sort_by { |cut, deltas| cut }.map { |cut, deltas| "#{cut} => [#{deltas[0].to_i}, #{deltas[1].to_i}]" }.join(', ')}"
+        p "Set #{i} with avg of #{average_of_deltas.to_i} for cuts at: #{set_of_cuts.sort_by { |cut, deltas| cut }.map { |cut, deltas| "#{cut} => [#{deltas[0].to_i}, #{deltas[1].to_i}]" }.join(', ')}"
 
         if average_highest < average_of_deltas
           average_highest = average_of_deltas
